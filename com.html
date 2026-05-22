@@ -1,0 +1,209 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Поиск друзей — Research Nexus</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .search-section {
+      margin-bottom: 30px;
+    }
+    .search-input {
+      width: 70%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .search-button {
+      padding: 12px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .users-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .user-card {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    .user-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #ddd;
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #666;
+    }
+    .add-friend-btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .add-friend-btn:hover {
+      background: #45a049;
+    }
+    .add-friend-btn.added {
+      background: #888;
+      cursor: default;
+    }
+    .friends-count {
+      color: #666;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .message {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Поиск друзей</h1>
+
+    <div class="search-section">
+      <input type="text" class="search-input" id="searchInput" placeholder="Введите имя или email пользователя...">
+      <button class="search-button" onclick="searchUsers()">Найти</button>
+    </div>
+
+    <div id="usersList" class="users-list">
+      <!-- Список пользователей будет загружаться здесь -->
+    </div>
+
+    <div id="noResults" class="message" style="display: none;">
+      Пользователи не найдены
+    </div>
+  </div>
+
+  <script>
+    // Текущий авторизованный пользователь
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+    // Если пользователь не авторизован, перенаправляем на страницу входа
+    if (!currentUser) {
+      window.location.href = 'sign.html';
+      exit;
+    }
+
+    // Список друзей текущего пользователя (из localStorage)
+    let friends = JSON.parse(localStorage.getItem(`friends_${currentUser.email}`)) || [];
+
+    // Загружаем список всех пользователей (кроме текущего)
+    function loadAllUsers() {
+      const allUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      const filteredUsers = allUsers.filter(user => user.email !== currentUser.email);
+      displayUsers(filteredUsers);
+    }
+
+    // Поиск пользователей по имени или email
+    function searchUsers() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const allUsers = JSON.parse(localStorage.getItem('users') || '[]');
+
+      const filteredUsers = allUsers.filter(user =>
+        user.email.toLowerCase().includes(searchTerm) ||
+        user.username.toLowerCase().includes(searchTerm)
+      ).filter(user => user.email !== currentUser.email); // Исключаем текущего пользователя
+
+      if (filteredUsers.length > 0) {
+        document.getElementById('noResults').style.display = 'none';
+        displayUsers(filteredUsers);
+      } else {
+        document.getElementById('usersList').innerHTML = '';
+        document.getElementById('noResults').style.display = 'block';
+      }
+    }
+
+    // Отображение списка пользователей
+    function displayUsers(users) {
+      const usersList = document.getElementById('usersList');
+      usersList.innerHTML = '';
+
+      users.forEach(user => {
+        const isFriend = friends.includes(user.email);
+        const friendButtonText = isFriend ? 'В друзьях' : 'Добавить в друзья';
+        const buttonClass = isFriend ? 'add-friend-btn added' : 'add-friend-btn';
+
+        const userCard = document.createElement('div');
+        userCard.className = 'user-card';
+        userCard.innerHTML = `
+          <div class="user-avatar">${user.username.charAt(0).toUpperCase()}</div>
+          <h3>${user.username}</h3>
+          <p>${user.email}</p>
+          <div class="friends-count">Друзей: ${getFriendCount(user.email)}</div>
+          <button class="${buttonClass}" onclick="addFriend('${user.email}', this)">${friendButtonText}</button>
+        `;
+        usersList.appendChild(userCard);
+      });
+    }
+
+    // Получение количества друзей у пользователя
+    function getFriendCount(userEmail) {
+      const userFriends = JSON.parse(localStorage.getItem(`friends_${userEmail}`)) || [];
+      return userFriends.length;
+    }
+
+    // Добавление в друзья
+    function addFriend(friendEmail, button) {
+      if (!friends.includes(friendEmail)) {
+        friends.push(friendEmail);
+        localStorage.setItem(`friends_${currentUser.email}`, JSON.stringify(friends));
+
+        // Обновляем кнопку
+        button.textContent = 'В друзьях';
+        button.className = 'add-friend-btn added';
+
+        alert('Пользователь добавлен в друзья!');
+      } else {
+        alert('Этот пользователь уже в ваших друзьях!');
+      }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+      loadAllUsers();
+    });
+  </script>
+</body>
+</html>

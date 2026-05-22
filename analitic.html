@@ -1,0 +1,254 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Аналитический поиск — Research Nexus</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .search-section {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .search-input {
+      width: 70%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .search-button {
+      padding: 12px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .filters {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-size: 14px;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    select, input[type="date"] {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    #results {
+      margin-top: 30px;
+    }
+    .result-item {
+      border: 1px solid #eee;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 15px;
+      transition: box-shadow 0.2s;
+    }
+    .result-item:hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .result-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #4CAF50;
+      margin-bottom: 8px;
+    }
+    .result-url {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .result-snippet {
+      color: #666;
+      line-height: 1.4;
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    .error {
+      color: red;
+      text-align: center;
+      padding: 20px;
+    }
+    .message {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Аналитический поиск</h1>
+
+    <div class="search-section">
+      <input type="text" class="search-input" id="searchQuery" placeholder="Введите поисковый запрос...">
+      <button class="search-button" id="searchButton">Найти</button>
+
+    </div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label for="sourceFilter">Источник:</label>
+        <select id="sourceFilter">
+          <option value="all">Все источники</option>
+          <option value="scholar">Научные статьи</option>
+          <option value="news">Новости</option>
+          <option value="patents">Патенты</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="dateFilter">Период:</label>
+        <select id="dateFilter">
+          <option value="any">Любой период</option>
+          <option value="year">За последний год</option>
+          <option value="month">За последний месяц</option>
+          <option value="week">За последнюю неделю</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="languageFilter">Язык:</label>
+        <select id="languageFilter">
+          <option value="ru">Русский</option>
+          <option value="en">Английский</option>
+          <option value="all">Любой</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="results">
+      <!-- Результаты поиска будут загружаться здесь -->
+    </div>
+  </div>
+
+  <script>
+    // Проверка авторизации
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+      window.location.href = 'sign.html';
+      exit;
+    }
+
+    // Функция выполнения поиска
+    function performSearch() {
+      const query = document.getElementById('searchQuery').value.trim();
+      if (!query) {
+        alert('Пожалуйста, введите поисковый запрос');
+        return;
+      }
+
+      // Показываем индикатор загрузки
+      document.getElementById('results').innerHTML = '<div class="loading">Выполняется поиск...</div>';
+
+      // Получаем параметры фильтров
+      const source = document.getElementById('sourceFilter').value;
+      const dateRange = document.getElementById('dateFilter').value;
+      const language = document.getElementById('languageFilter').value;
+
+      console.log('Параметры поиска:', { query, source, dateRange, language });
+
+      // В реальном приложении здесь был бы запрос к API
+      // Для демонстрации используем имитацию данных
+      setTimeout(() => {
+        try {
+          const mockResults = generateMockResults(query, 10);
+          displayResults(mockResults);
+        } catch (error) {
+          console.error('Ошибка при генерации результатов:', error);
+          document.getElementById('results').innerHTML =
+            '<div class="error">Произошла ошибка при выполнении поиска. Попробуйте ещё раз.</div>';
+        }
+      }, 1500);
+    }
+
+    // Генерация тестовых результатов (заглушка для реального API)
+    function generateMockResults(query, count) {
+      const sources = ['scholar', 'news', 'patents', 'web'];
+      const languages = ['ru', 'en'];
+
+      const results = [];
+      for (let i = 0; i < count; i++) {
+        const source = sources[Math.floor(Math.random() * sources.length)];
+        const language = languages[Math.floor(Math.random() * languages.length)];
+
+        results.push({
+          title: `Результат ${i + 1}: ${query} — исследование и анализ`,
+          url: `https://example.com/article-${i + 1}`,
+          snippet: `Краткое описание результата поиска по запросу "${query}". Содержит аналитические данные, статистику и выводы по теме. Актуально на текущий момент.`,
+          source: source,
+          language: language,
+          date: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        });
+      }
+      return results;
+    }
+
+    // Отображение результатов поиска
+    function displayResults(results) {
+      const resultsContainer = document.getElementById('results');
+
+      if (results.length === 0) {
+        resultsContainer.innerHTML = '<div class="message">По вашему запросу ничего не найдено</div>';
+        return;
+      }
+
+      let html = '';
+      results.forEach(result => {
+        html += 
+          <div class="result-item">
+            <div class="result-title">
+              <a href="${result.url}" target="_blank">${result.title}
+            </a>
+        </div>
+            <div class="result-url">${result.url}</div>
+            <div class="result-snippet">${result.snippet}</div>
+            <div style="margin-top: 10px; font-size: 12px; color: #888;">
+              Источник: ${result.source} | Язык: ${result.language} | Дата: ${result.date}
+            </div>
+          </div>
+        ;
+      });
+
+      resultsContainer.innerHTML = html;
+      document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('searchButton').addEventListener('click', performSearch);
+});
+
+    }
+    
+  </script>
+</body>
+</html>

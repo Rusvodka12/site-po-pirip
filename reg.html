@@ -1,0 +1,174 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Вход в Research Nexus</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .links {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .links a {
+      color: #4CAF50;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Вход в систему</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="email" required>
+        <div class="error" id="emailError">Введите корректный email</div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Пароль *</label>
+        <input type="password" id="password" name="password" required>
+        <div class="error" id="passwordError">Пароль не может быть пустым</div>
+      </div>
+
+      <button type="submit">Войти</button>
+    </form>
+
+    <div class="links">
+      <a href="register.html">Регистрация</a>
+      <a href="#">Забыли пароль?</a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginForm = document.getElementById('loginForm');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+
+      // Функция показа ошибки
+      function showError(inputId, errorId) {
+        document.getElementById(errorId).style.display = 'block';
+        document.getElementById(inputId).style.borderColor = 'red';
+      }
+
+      // Функция скрытия ошибки
+      function hideError(inputId, errorId) {
+        document.getElementById(errorId).style.display = 'none';
+        document.getElementById(inputId).style.borderColor = '#ddd';
+      }
+
+      // Валидация email
+      emailInput.addEventListener('blur', function() {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(this.value)) {
+          showError('email', 'emailError');
+        } else {
+          hideError('email', 'emailError');
+        }
+      });
+
+      // Валидация пароля
+      passwordInput.addEventListener('blur', function() {
+        if (this.value.length === 0) {
+          showError('password', 'passwordError');
+        } else {
+          hideError('password', 'passwordError');
+        }
+      });
+
+      // Обработка отправки формы
+      loginForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        let isValid = true;
+
+        // Проверка всех полей
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailInput.value)) {
+          showError('email', 'emailError');
+          isValid = false;
+        }
+
+        if (passwordInput.value.length === 0) {
+          showError('password', 'passwordError');
+          isValid = false;
+        }
+
+        if (isValid) {
+          // Получаем сохранённых пользователей
+          const users = JSON.parse(localStorage.getItem('users') || '[]');
+          const user = users.find(u => u.email === emailInput.value && u.password === passwordInput.value);
+
+          if (user) {
+            // Успешная авторизация
+            localStorage.setItem('isAuthenticated', 'true');
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            console.log('Вход выполнен успешно!');
+            alert('Добро пожаловать, ' + user.username + '!');
+            window.location.href = 'index.html';
+          } else {
+            alert('Неверный email или пароль!');
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

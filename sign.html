@@ -1,0 +1,219 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Регистрация в Research Nexus</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .login-link a {
+      color: #4CAF50;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Регистрация</h2>
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="username">Имя пользователя *</label>
+        <input type="text" id="username" name="username" required>
+        <div class="error" id="usernameError">Имя пользователя должно содержать не менее 3 символов</div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="email" required>
+        <div class="error" id="emailError">Введите корректный email</div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Пароль *</label>
+        <input type="password" id="password" name="password" required>
+        <div class="error" id="passwordError">Пароль должен содержать не менее 6 символов</div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Подтвердите пароль *</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required>
+        <div class="error" id="confirmPasswordError">Пароли не совпадают</div>
+      </div>
+
+      <button type="submit">Зарегистрироваться</button>
+    </form>
+
+    <div class="login-link">
+      Уже есть аккаунт? <a href="reg.html">Войдите</a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const registerForm = document.getElementById('registerForm');
+      const usernameInput = document.getElementById('username');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+
+      // Функция показа ошибки
+      function showError(inputId, errorId) {
+        document.getElementById(errorId).style.display = 'block';
+        document.getElementById(inputId).style.borderColor = 'red';
+      }
+
+      // Функция скрытия ошибки
+      function hideError(inputId, errorId) {
+        document.getElementById(errorId).style.display = 'none';
+        document.getElementById(inputId).style.borderColor = '#ddd';
+      }
+
+      // Валидация имени пользователя
+      usernameInput.addEventListener('blur', function() {
+        if (this.value.length < 3) {
+          showError('username', 'usernameError');
+        } else {
+          hideError('username', 'usernameError');
+        }
+      });
+
+      // Валидация email
+      emailInput.addEventListener('blur', function() {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(this.value)) {
+          showError('email', 'emailError');
+        } else {
+          hideError('email', 'emailError');
+        }
+      });
+
+      // Валидация пароля
+      passwordInput.addEventListener('blur', function() {
+        if (this.value.length < 6) {
+          showError('password', 'passwordError');
+        } else {
+          hideError('password', 'passwordError');
+        }
+      });
+
+      // Валидация подтверждения пароля
+      confirmPasswordInput.addEventListener('blur', function() {
+        if (this.value !== passwordInput.value) {
+          showError('confirmPassword', 'confirmPasswordError');
+        } else {
+          hideError('confirmPassword', 'confirmPasswordError');
+        }
+      });
+
+      // Обработка отправки формы
+      registerForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        let isValid = true;
+
+        // Проверка всех полей
+        if (usernameInput.value.length < 3) {
+          showError('username', 'usernameError');
+          isValid = false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailInput.value)) {
+          showError('email', 'emailError');
+          isValid = false;
+        }
+
+        if (passwordInput.value.length < 6) {
+          showError('password', 'passwordError');
+          isValid = false;
+        }
+
+        if (confirmPasswordInput.value !== passwordInput.value) {
+          showError('confirmPassword', 'confirmPasswordError');
+          isValid = false;
+        }
+
+        if (isValid) {
+          // Сохраняем пользователя в localStorage
+          const users = JSON.parse(localStorage.getItem('users') || '[]');
+          const userExists = users.some(user => user.email === emailInput.value);
+
+          if (userExists) {
+            alert('Пользователь с таким email уже существует!');
+            return;
+          }
+
+          users.push({
+            username: usernameInput.value,
+            email: emailInput.value,
+            password: passwordInput.value // В реальном приложении пароли нужно хешировать!
+          });
+
+          localStorage.setItem('users', JSON.stringify(users));
+          console.log('Регистрация успешна!');
+          alert('Регистрация прошла успешно! Теперь вы можете войти.');
+          window.location.href = 'sign.html';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

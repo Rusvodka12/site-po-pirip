@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Query — Отправка запросов к ИИ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Query</h1>
+            <p>Отправьте запрос к искусственному интеллекту через API</p>
+        </header>
+
+        <main>
+            <div class="query-section">g
+                <textarea
+                    id="user-query"
+                    placeholder="Введите ваш запрос к ИИ..."
+                    rows="4"
+                ></textarea>
+                <button id="send-btn">Отправить запрос</button>
+            </div>
+
+            <div id="loading" class="hidden">
+                <div class="spinner"></div>
+                <p>Ожидание ответа от ИИ...</p>
+            </div>
+
+            <div id="response-section" class="hidden">
+                <h2>Ответ от ИИ:</h2>
+                <pre id="ai-response"></pre>
+                <button id="copy-btn">Копировать ответ</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 AI Query. Все права защищены.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
